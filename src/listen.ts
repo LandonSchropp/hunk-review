@@ -11,9 +11,9 @@ export const USAGE = "listen [--repo <path>] [--session <id>]";
 
 const HELP = `Usage: hunk review ${USAGE}
 
-Prints each decision made in a Hunk review, one line at a time: approve or
-deny. Prints quit when the review closes, then exits. Waits for a review to
-open if none is open yet.
+Prints each decision made in a Hunk review, one line at a time: review-approved
+or review-denied. Prints review-closed when the review closes, then exits. Waits
+for the review to open if it isn't open yet.
 
 Options:
 
@@ -168,6 +168,6 @@ export async function listen(
     await context.stdout.write(`${line}\n`);
   }
 
-  await context.stdout.write("quit\n");
+  await context.stdout.write("review-closed\n");
   return 0;
 }

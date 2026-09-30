@@ -173,13 +173,13 @@ describe("listen", () => {
       await connected();
     });
 
-    it("prints each decision, then quit when the review closes", async () => {
+    it("prints each decision, then review-closed when the review closes", async () => {
       channel.broadcast("deny");
       channel.broadcast("approve");
       await Bun.sleep(20);
       channel.close();
       await exitCode;
-      expect(stdout).toBe("deny\napprove\nquit\n");
+      expect(stdout).toBe("deny\napprove\nreview-closed\n");
     });
 
     it("exits successfully when the review closes", async () => {
@@ -204,7 +204,7 @@ describe("listen", () => {
     it("waits for it", async () => {
       channel.close();
       await exitCode;
-      expect(stdout).toBe("quit\n");
+      expect(stdout).toBe("review-closed\n");
     });
   });
 
@@ -248,7 +248,7 @@ describe("listen", () => {
       await Bun.sleep(20);
       channel.close();
       await exitCode;
-      expect(stdout).toBe("approve\nquit\n");
+      expect(stdout).toBe("approve\nreview-closed\n");
     });
   });
 
@@ -288,7 +288,7 @@ describe("listen", () => {
       await Bun.sleep(20);
       channel.close();
       await exitCode;
-      expect(stdout).toBe("deny\nquit\n");
+      expect(stdout).toBe("deny\nreview-closed\n");
     });
   });
 

@@ -91,7 +91,7 @@ describe("registerHunkReview", () => {
       });
 
       it("delivers decisions to it", async () => {
-        expect(await received).toBe("approve\n");
+        expect(await received).toBe("review-approved\n");
       });
     });
   });

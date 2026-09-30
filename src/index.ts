@@ -15,7 +15,13 @@ export default function registerHunkReview(hunk: HunkExtensionAPI) {
 
   hunk.on("shutdown", () => channel?.close());
 
-  registerModal(hunk, (decision) => channel?.broadcast(decision) ?? 0);
+  registerModal(
+    hunk,
+    (decision) =>
+      channel?.broadcast(
+        decision === "approve" ? "review-approved" : "review-denied",
+      ) ?? 0,
+  );
 
   hunk.registerCliCommand(
     {
