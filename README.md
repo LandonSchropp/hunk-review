@@ -27,7 +27,7 @@ To use another key, remap `hunk-review.review` in the `[keybindings]` table of y
 hunk review listen [--repo <path>] [--session <id>]
 ```
 
-`hunk review listen` prints each decision made in a Hunk review, one line at a time: `approve` or `deny`. When the review closes, it prints `quit` and exits. It waits for the review to open if it isn't open yet.
+`hunk review listen` prints each decision made in a Hunk review, one line at a time: `review-approved` or `review-denied`. When the review closes, it prints `review-closed` and exits. It waits for the review to open if it isn't open yet.
 
 It listens to the review of the repository in the current directory, or the one `--repo` names. If several reviews are open in the same repository, it asks you to pick one with `--session`, using an ID from `hunk session list`.
 
