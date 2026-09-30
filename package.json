@@ -1,0 +1,26 @@
+{
+  "name": "hunk-review",
+  "version": "0.1.0",
+  "description": "Approve or deny a diff from inside Hunk, and hand the decision to a listening agent",
+  "author": "Landon Schropp <schroppl@gmail.com>",
+  "repository": "https://github.com/LandonSchropp/hunk-review",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "hunk": {
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "apiVersion": 25
+  },
+  "scripts": {
+    "test": "bun test --isolate",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.6",
+    "@types/react": "^19",
+    "hunkdiff": "^0.22.0",
+    "typescript": "^5.9.3"
+  }
+}
