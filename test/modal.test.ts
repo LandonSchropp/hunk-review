@@ -263,6 +263,35 @@ describe("registerModal", () => {
     });
   });
 
+  describe("when the reviewer presses a", () => {
+    let result: unknown;
+
+    beforeEach(() => {
+      hunk.open();
+      result = hunk.press("a");
+    });
+
+    it("approves straight away", () => {
+      expect(hunk.decide).toHaveBeenCalledWith("approve");
+    });
+
+    it("gives the keyboard back", () => {
+      expect(result).toBe("exit");
+    });
+  });
+
+  describe("when the reviewer presses d", () => {
+    beforeEach(() => {
+      hunk.open();
+      hunk.press("right");
+      hunk.press("d");
+    });
+
+    it("denies straight away", () => {
+      expect(hunk.decide).toHaveBeenCalledWith("deny");
+    });
+  });
+
   describe("when the reviewer chooses", () => {
     beforeEach(async () => {
       hunk.open();

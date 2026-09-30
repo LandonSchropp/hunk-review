@@ -168,14 +168,16 @@ export function registerModal(
 
   hunk.registerKeyboardMode({
     id: "review",
-    title: "Review — ←/→ select · enter choose",
+    title: "Review — a approve · d deny · ←/→ select · enter choose",
     onKey: (key, context) => {
       if (["left", "right", "tab", "h", "l"].includes(key.name ?? "")) {
         selected = selected === "approve" ? "deny" : "approve";
         paint();
       }
 
-      if (key.name !== "return" && key.name !== "enter") {
+      if (key.name === "a" || key.name === "d") {
+        selected = key.name === "a" ? "approve" : "deny";
+      } else if (key.name !== "return" && key.name !== "enter") {
         return "handled";
       }
 
