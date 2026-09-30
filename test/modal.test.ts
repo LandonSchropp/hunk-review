@@ -242,6 +242,10 @@ describe("registerModal", () => {
     it("gives the keyboard back", () => {
       expect(result).toBe("exit");
     });
+
+    it("removes the overlay right away", () => {
+      expect(hunk.root.children).toHaveLength(1);
+    });
   });
 
   describe("when the reviewer chooses Deny", () => {
@@ -280,6 +284,10 @@ describe("registerModal", () => {
 
     it("closes the helper pane", () => {
       expect(hunk.paneControls.close).toHaveBeenCalledWith("modal");
+    });
+
+    it("removes the overlay", () => {
+      expect(hunk.root.children).toHaveLength(1);
     });
 
     it("delivers nothing", () => {

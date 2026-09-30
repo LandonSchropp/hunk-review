@@ -142,8 +142,11 @@ export function registerModal(
   }
 
   // ponytail: fixed delay, retry until the pane reports closed if it proves flaky.
-  const close = () =>
+  // The overlay goes at once. Only the invisible helper pane waits for the delayed close.
+  const close = () => {
+    detach();
     setTimeout(() => hunk.events.emit(CLOSE_EVENT, {}), CLOSE_DELAY);
+  };
 
   hunk.events.on(CLOSE_EVENT, (_payload, context) =>
     context.panes.close("modal"),
