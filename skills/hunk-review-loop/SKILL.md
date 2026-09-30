@@ -25,28 +25,28 @@ Run the listener under a tool that turns each line a background command prints i
 hunk review listen --repo <directory>
 ```
 
-Each decision arrives as its own line, `approve` or `deny`, whenever the user makes it. `quit` means the user closed the review. Re-arm the listener whenever it expires while the review is still open.
+Each decision arrives as its own line, `review-approved` or `review-denied`, whenever the user makes it. `review-closed` means the user closed the review. Re-arm the listener whenever it expires while the review is still open.
 
 If the listener says several reviews are open, pass `--session` with the ID of the one you opened: the newest in `hunk session list --json` for that repository.
 
 ## Act on a Decision
 
-Read the user's comments after every decision, approve or deny:
+Read the review's comments after every decision, approve or deny:
 
 ```bash
-hunk session comment list --repo <directory> --type user --json
+hunk session comment list --repo <directory> --type all --json
 ```
+
+Act on the user's comments that don't have a reply from you yet. The rest were handled in an earlier round.
 
 - **Deny:** Address the comments, then wait for the next decision. Don't treat the work as accepted until an approval arrives.
 - **Approve:** The changes are accepted. Make any small fixes the comments ask for without another review.
 
-You can reply to any comment to push back instead of making a change, or to add context alongside one:
+Reply to every comment you handle, so the next round can tell it's done: confirm the change, push back instead of making it, or add context alongside it.
 
 ```bash
 hunk session comment add --repo <directory> --reply-to <comment-id> --summary "<reply>"
 ```
-
-As the last step before the user reviews again, remove the comments you addressed with `hunk session comment rm --repo <directory> <comment-id>`. Leave the threads you pushed back on, so the user can answer them.
 
 ## Rationalizations
 
