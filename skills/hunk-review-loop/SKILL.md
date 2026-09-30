@@ -1,0 +1,57 @@
+---
+name: hunk-review-loop
+description: Use when the user should review code changes in Hunk and approve or deny them, or when an approve or deny decision arrives from a Hunk review.
+---
+
+# Hunk Review Loop
+
+The user reviews changes in [Hunk](https://hunk.dev/), leaves comments, and presses a key to approve or deny. The `hunk-review` Hunk extension hands each decision to `hunk review listen`. Run `hunk review listen --help` for its options.
+
+## Open the Review
+
+Open Hunk where the user can see it, in a terminal tab or pane of its own, in the repository holding the changes:
+
+```bash
+hunk diff --watch
+```
+
+Use `hunk diff --staged --watch` to review only staged changes. `--watch` keeps the review current as you change files, so one Hunk session lasts across every round of review. Don't open a second one while it's running.
+
+## Listen for Decisions
+
+Run the listener under a tool that turns each line a background command prints into a notification, such as Claude Code's Monitor tool, with the longest timeout it allows:
+
+```bash
+hunk review listen --repo <directory>
+```
+
+Each decision arrives as its own line, `approve` or `deny`, whenever the user makes it. `quit` means the user closed the review. Re-arm the listener whenever it expires while the review is still open.
+
+If the listener says several reviews are open, pass `--session` with the ID of the one you opened: the newest in `hunk session list --json` for that repository.
+
+## Act on a Decision
+
+Read the user's comments after every decision, approve or deny:
+
+```bash
+hunk session comment list --repo <directory> --type user --json
+```
+
+- **Deny:** Address the comments, then wait for the next decision. Don't treat the work as accepted until an approval arrives.
+- **Approve:** The changes are accepted. Make any small fixes the comments ask for without another review.
+
+You can reply to any comment to push back instead of making a change, or to add context alongside one:
+
+```bash
+hunk session comment add --repo <directory> --reply-to <comment-id> --summary "<reply>"
+```
+
+As the last step before the user reviews again, remove the comments you addressed with `hunk session comment rm --repo <directory> <comment-id>`. Leave the threads you pushed back on, so the user can answer them.
+
+## Rationalizations
+
+| Thought                                            | Reality                                                             |
+| -------------------------------------------------- | ------------------------------------------------------------------- |
+| "Approved, so there's nothing to read"             | Approvals can carry comments. Read them every time.                 |
+| "I'll ask the user whether they're done reviewing" | The decision arrives on its own. Wait for it.                       |
+| "I'll reopen Hunk for the next round"              | `--watch` already shows the new changes. Keep the one session open. |
