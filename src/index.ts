@@ -19,7 +19,11 @@ export default function registerHunkReview(hunk: HunkExtensionAPI) {
     hunk,
     (decision) =>
       channel?.broadcast(
-        decision === "approve" ? "review-approved" : "review-denied",
+        {
+          approve: "review-approved",
+          comment: "review-commented",
+          deny: "review-denied",
+        }[decision],
       ) ?? 0,
   );
 

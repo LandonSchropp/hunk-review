@@ -163,14 +163,24 @@ describe("registerModal", () => {
       expect(hunk.text("Approve these changes?")).toBeDefined();
     });
 
-    it("selects Deny", () => {
-      expect(hunk.text("Deny")!["bg"]).toBe(theme.badgeRemoved);
+    it("selects Comment", () => {
+      expect(hunk.text("Comment")!["bg"]).toBe(theme.accent);
     });
 
-    it("renders both buttons at the same width", () => {
-      expect(hunk.text("  Approve")!["content"].length).toBe(
-        hunk.text("Deny")!["content"].length,
+    it("puts Comment between Approve and Deny", () => {
+      const labels = descendants(hunk.root)
+        .map((node) => String(node["content"]).trim())
+        .filter((label) => ["Approve", "Comment", "Deny"].includes(label));
+
+      expect(labels).toEqual(["Approve", "Comment", "Deny"]);
+    });
+
+    it("renders every button at the same width", () => {
+      const widths = ["  Approve", "Comment", "Deny"].map(
+        (label) => hunk.text(label)!["content"].length,
       );
+
+      expect(new Set(widths).size).toBe(1);
     });
   });
 
@@ -197,12 +207,47 @@ describe("registerModal", () => {
       hunk.press("right");
     });
 
-    it("highlights Approve", () => {
-      expect(hunk.text("  Approve")!["bg"]).toBe(theme.badgeAdded);
+    it("highlights Deny", () => {
+      expect(hunk.text("Deny")!["bg"]).toBe(theme.badgeRemoved);
     });
 
-    it("dims Deny", () => {
-      expect(hunk.text("Deny")!["bg"]).toBe(theme.panelAlt);
+    it("dims Comment", () => {
+      expect(hunk.text("Comment")!["bg"]).toBe(theme.panelAlt);
+    });
+  });
+
+  describe("when the reviewer moves the selection past the end", () => {
+    beforeEach(() => {
+      hunk.open();
+      hunk.press("right");
+      hunk.press("right");
+    });
+
+    it("wraps around to Approve", () => {
+      expect(hunk.text("  Approve")!["bg"]).toBe(theme.badgeAdded);
+    });
+  });
+
+  describe("when the reviewer moves the selection past the start", () => {
+    beforeEach(() => {
+      hunk.open();
+      hunk.press("left");
+      hunk.press("left");
+    });
+
+    it("wraps around to Deny", () => {
+      expect(hunk.text("Deny")!["bg"]).toBe(theme.badgeRemoved);
+    });
+  });
+
+  describe("when the reviewer presses h", () => {
+    beforeEach(() => {
+      hunk.open();
+      hunk.press("h");
+    });
+
+    it("highlights Approve", () => {
+      expect(hunk.text("  Approve")!["bg"]).toBe(theme.badgeAdded);
     });
   });
 
@@ -248,9 +293,25 @@ describe("registerModal", () => {
     });
   });
 
+  describe("when the reviewer chooses Comment", () => {
+    beforeEach(() => {
+      hunk.open();
+      hunk.press("enter");
+    });
+
+    it("delivers the comments", () => {
+      expect(hunk.decide).toHaveBeenCalledWith("comment");
+    });
+
+    it("confirms the comments", () => {
+      expect(hunk.notify).toHaveBeenCalledWith("Sent the comments");
+    });
+  });
+
   describe("when the reviewer chooses Deny", () => {
     beforeEach(() => {
       hunk.open();
+      hunk.press("right");
       hunk.press("enter");
     });
 
@@ -280,10 +341,21 @@ describe("registerModal", () => {
     });
   });
 
-  describe("when the reviewer presses d", () => {
+  describe("when the reviewer presses c", () => {
     beforeEach(() => {
       hunk.open();
       hunk.press("right");
+      hunk.press("c");
+    });
+
+    it("comments straight away", () => {
+      expect(hunk.decide).toHaveBeenCalledWith("comment");
+    });
+  });
+
+  describe("when the reviewer presses d", () => {
+    beforeEach(() => {
+      hunk.open();
       hunk.press("d");
     });
 

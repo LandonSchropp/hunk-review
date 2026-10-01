@@ -18,10 +18,9 @@ let cliCommands: Map<string, Handler>;
 let mode: ExtensionKeyboardMode;
 let notify: ReturnType<typeof mock>;
 
-/** Choose Approve in the modal, the way the keyboard does. */
-function approve() {
-  mode.onKey({ name: "left" }, { notify } as never);
-  mode.onKey({ name: "return" }, { notify } as never);
+/** Decide in the modal with its shortcut key: a, c or d. */
+function press(key: string) {
+  mode.onKey({ name: key }, { notify } as never);
 }
 
 beforeEach(() => {
@@ -52,7 +51,7 @@ afterEach(() => {
 describe("registerHunkReview", () => {
   describe("when no review has loaded", () => {
     beforeEach(() => {
-      approve();
+      press("a");
     });
 
     it("has nothing to deliver decisions to", () => {
@@ -83,15 +82,25 @@ describe("registerHunkReview", () => {
         received = new Promise((resolve) =>
           listener.once("data", (data) => resolve(data.toString())),
         );
-        approve();
       });
 
       afterEach(() => {
         listener.destroy();
       });
 
-      it("delivers decisions to it", async () => {
+      it("delivers approvals to it", async () => {
+        press("a");
         expect(await received).toBe("review-approved\n");
+      });
+
+      it("delivers comments to it", async () => {
+        press("c");
+        expect(await received).toBe("review-commented\n");
+      });
+
+      it("delivers denials to it", async () => {
+        press("d");
+        expect(await received).toBe("review-denied\n");
       });
     });
   });

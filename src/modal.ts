@@ -5,7 +5,7 @@ import type {
 } from "hunkdiff/extension";
 import { createElement } from "react";
 
-export type Decision = "approve" | "deny";
+export type Decision = "approve" | "comment" | "deny";
 
 /** The slice of an OpenTUI renderable the modal builds itself from. */
 interface Renderable {
@@ -28,7 +28,17 @@ type RenderableConstructor<Built> = new (
 const CLOSE_EVENT = "hunk-review:close";
 const CLOSE_DELAY = 150;
 const BUTTON_WIDTH = 11;
-const DECISIONS: readonly Decision[] = ["approve", "deny"];
+const DECISIONS: readonly Decision[] = ["approve", "comment", "deny"];
+const SHORTCUTS: Record<string, Decision> = {
+  a: "approve",
+  c: "comment",
+  d: "deny",
+};
+const NOTICES: Record<Decision, string> = {
+  approve: "Approved the review",
+  comment: "Sent the comments",
+  deny: "Denied the review",
+};
 
 /** Pad a label on both sides to the button width. */
 function centered(label: string) {
@@ -37,14 +47,14 @@ function centered(label: string) {
 }
 
 /**
- * Register the approve/deny modal. `decide` delivers a decision and returns how many listeners
+ * Register the review modal. `decide` delivers a decision and returns how many listeners
  * heard it.
  */
 export function registerModal(
   hunk: HunkExtensionAPI,
   decide: (decision: Decision) => number,
 ) {
-  let selected: Decision = "deny";
+  let selected: Decision = "comment";
   let overlay:
     | {
         backdrop: Renderable;
@@ -55,6 +65,7 @@ export function registerModal(
 
   const colors = (theme: ExtensionPaneTheme): Record<Decision, string> => ({
     approve: theme.badgeAdded,
+    comment: theme.accent,
     deny: theme.badgeRemoved,
   });
 
@@ -116,6 +127,7 @@ export function registerModal(
 
     const buttons = {
       approve: new Text(context, { content: centered("Approve") }),
+      comment: new Text(context, { content: centered("Comment") }),
       deny: new Text(context, { content: centered("Deny") }),
     };
 
@@ -126,8 +138,7 @@ export function registerModal(
         bg: theme.panel,
       }),
     );
-    row.add(buttons.approve);
-    row.add(buttons.deny);
+    DECISIONS.forEach((decision) => row.add(buttons[decision]));
     modal.add(row);
     backdrop.add(modal);
     root.add(backdrop);
@@ -168,15 +179,21 @@ export function registerModal(
 
   hunk.registerKeyboardMode({
     id: "review",
-    title: "Review — a approve · d deny · ←/→ select · enter choose",
+    title:
+      "Review — a approve · c comment · d deny · ←/→ select · enter choose",
     onKey: (key, context) => {
-      if (["left", "right", "tab", "h", "l"].includes(key.name ?? "")) {
-        selected = selected === "approve" ? "deny" : "approve";
+      const step = { left: -1, h: -1, right: 1, l: 1, tab: 1 }[key.name ?? ""];
+
+      if (step) {
+        const index = DECISIONS.indexOf(selected) + step + DECISIONS.length;
+        selected = DECISIONS[index % DECISIONS.length]!;
         paint();
       }
 
-      if (key.name === "a" || key.name === "d") {
-        selected = key.name === "a" ? "approve" : "deny";
+      const shortcut = SHORTCUTS[key.name ?? ""];
+
+      if (shortcut) {
+        selected = shortcut;
       } else if (key.name !== "return" && key.name !== "enter") {
         return "handled";
       }
@@ -184,9 +201,7 @@ export function registerModal(
       if (decide(selected) === 0) {
         context.notify("Nothing is listening for this review", "warning");
       } else {
-        context.notify(
-          selected === "approve" ? "Approved the review" : "Denied the review",
-        );
+        context.notify(NOTICES[selected]);
       }
 
       close();
@@ -196,9 +211,13 @@ export function registerModal(
   });
 
   hunk.registerCommand(
-    { id: "review", title: "Approve or deny the changes", key: "ctrl+r" },
+    {
+      id: "review",
+      title: "Approve, comment on or deny the changes",
+      key: "ctrl+r",
+    },
     (context) => {
-      selected = "deny";
+      selected = "comment";
       context.panes.open("modal");
       context.keyboardModes.enterMode("review");
     },

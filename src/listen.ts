@@ -11,9 +11,9 @@ export const USAGE = "listen [--repo <path>] [--session <id>]";
 
 const HELP = `Usage: hunk review ${USAGE}
 
-Prints each decision made in a Hunk review, one line at a time: review-approved
-or review-denied. Prints review-closed when the review closes, then exits. Waits
-for the review to open if it isn't open yet.
+Prints each decision made in a Hunk review, one line at a time: review-approved,
+review-commented or review-denied. Prints review-closed when the review closes,
+then exits. Waits for the review to open if it isn't open yet.
 
 Options:
 
